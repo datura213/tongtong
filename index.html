@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活动搭建系统 — 后台预览</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f7f8fa;
+    --bg-input: #f5f6f8;
+    --border: #e5e7eb;
+    --border-light: #d1d5db;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #4f46e5;
+    --accent-light: #6366f1;
+    --accent-glow: rgba(79, 70, 229, 0.08);
+    --success: #059669;
+    --success-bg: rgba(5, 150, 105, 0.08);
+    --warning: #d97706;
+    --warning-bg: rgba(217, 119, 6, 0.08);
+    --danger: #dc2626;
+    --danger-bg: rgba(220, 38, 38, 0.06);
+    --info: #2563eb;
+    --info-bg: rgba(37, 99, 235, 0.06);
+    --orange: #ea580c;
+    --orange-bg: rgba(234, 88, 12, 0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.08);
+    --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'DM Sans', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(108,92,231,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -200px;
+    left: -200px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0,206,201,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === 侧边栏 === */
+  .sidebar {
+    width: 260px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transition: var(--transition);
+  }
+
+  .sidebar-header {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sidebar-logo .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent), #a29bfe);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(108,92,231,0.3);
+  }
+
+  .sidebar-logo .logo-text {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .sidebar-logo .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    overflow-y: auto;
+  }
+
+  .nav-section {
+    margin-bottom: 24px;
+  }
+
+  .nav-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    padding: 0 12px;
+    margin-bottom: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13.5px;
+    font-weight: 500;
+    position: relative;
+    user-select: none;
+  }
+
+  .nav-item:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .nav-item.active {
+    background: var(--accent-glow);
+    color: var(--accent-light);
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+
+  .nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sidebar-footer .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--success));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .sidebar-footer .user-info {
+    flex: 1;
+  }
+
+  .sidebar-footer .user-name {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .sidebar-footer .user-role {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* === 主内容区 === */
+  .main-content {
+    flex: 1;
+    margin-left: 260px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* === 顶部栏 === */
+  .topbar {
+    height: 64px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  .breadcrumb a:hover { color: var(--accent-light); }
+  .breadcrumb .current { color: var(--text-primary); font-weight: 500; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+  }
+
+  .topbar-btn:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-light);
+  }
+
+  /* === 页面内容 === */
+  .page-content {
+    flex: 1;
+    padding: 32px;
+  }
+
+  /* === 页面标题 === */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .page-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  /* === 按钮 === */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #8b7cf7);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 6px 24px rgba(108,92,231,0.4);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-light);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 8px 14px;
+  }
+
+  .btn-ghost:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .btn-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border: 1px solid rgba(255,118,117,0.2);
+  }
+
+  .btn-danger:hover {
+    background: rgba(255,118,117,0.15);
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  /* === Tab 导航 === */
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+
+  .tab-item {
+    padding: 8px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+  }
+
+  .tab-item:hover { color: var(--text-primary); }
+
+  .tab-item.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(108,92,231,0.3);
+  }
+
+  /* === 统计卡片 === */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    opacity: 0.05;
+    transform: translate(20px, -20px);
+  }
+
+  .stat-card:nth-child(1)::after { background: var(--accent); }
+  .stat-card:nth-child(2)::after { background: var(--warning); }
+
+  .stat-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-label i { font-size: 12px; }
+
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: -1px;
+  }
+
+  .stat-card:nth-child(1) .stat-value { color: var(--accent-light); }
+  .stat-card:nth-child(2) .stat-value { color: var(--warning); }
+
+  .stat-change {
+    font-size: 11px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-change.up { color: var(--success); }
+
+  /* === 表格 === */
+  .table-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .table-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .table-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    height: 36px;
+    transition: var(--transition);
+  }
+
+  .search-box:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .search-box i { color: var(--text-muted); font-size: 13px; }
+
+  .search-box input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    width: 200px;
+  }
+
+  .search-box input::placeholder { color: var(--text-muted); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 12px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 14px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(42,45,66,0.5);
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: var(--transition);
+  }
+
+  tbody tr:hover {
+    background: rgba(108,92,231,0.03);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* === 状态标签 === */
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-tag .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .status-draft { background: var(--bg-input); color: var(--text-secondary); }
+  .status-draft .dot { background: var(--text-muted); }
+
+  .status-pending { background: var(--warning-bg); color: var(--warning); }
+  .status-pending .dot { background: var(--warning); animation: pulse 2s infinite; }
+
+  .status-active { background: var(--success-bg); color: var(--success); }
+  .status-active .dot { background: var(--success); animation: pulse 2s infinite; }
+
+  .status-ended { background: var(--bg-input); color: var(--text-muted); }
+  .status-ended .dot { background: var(--text-muted); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* === 表单 === */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .form-label .required {
+    color: var(--danger);
+    font-size: 14px;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    transition: var(--transition);
+    outline: none;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder { color: var(--text-muted); }
+
+  .form-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b8fa8' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  .form-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* === 开关 === */
+  .switch-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .switch-label {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .switch-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .switch {
+    width: 44px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .switch.active {
+    background: var(--accent);
+  }
+
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .switch.active::after {
+    left: 23px;
+  }
+
+  /* === 页面区域 === */
+  .page-section {
+    display: none;
+  }
+
+  .page-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === 分页 === */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .pagination-info {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .pagination-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .page-btn:hover { background: var(--bg-card-hover); }
+  .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* === 标签 === */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .tag-purple { background: var(--accent-glow); color: var(--accent-light); }
+  .tag-green { background: var(--success-bg); color: var(--success); }
+  .tag-orange { background: var(--orange-bg); color: var(--orange); }
+
+  /* === 操作按钮组 === */
+  .action-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .action-btn {
+    padding: 5px 10px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+  }
+
+  .action-btn:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  /* === 弹窗 === */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 16px;
+  }
+
+  .modal-close:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* === 选品弹窗商品网格 === */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .product-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .product-card:hover {
+    border-color: var(--border-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .product-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+
+  .product-card .check-mark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: var(--transition);
+  }
+
+  .product-card.selected .check-mark {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .product-img {
+    width: 100%;
+    height: 100px;
+    background: var(--bg-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 24px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .product-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--orange);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .product-sku {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .product-stock {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* === 优惠券弹窗列表 === */
+  .coupon-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .coupon-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: var(--transition);
+    cursor: pointer;
+  }
+
+  .coupon-card:hover {
+    border-color: var(--border-light);
+  }
+
+  .coupon-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+
+  .coupon-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    background: var(--accent-glow);
+    color: var(--accent-light);
+  }
+
+  .coupon-detail {
+    flex: 1;
+  }
+
+  .coupon-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .coupon-amount {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 16px;
+  }
+
+  .coupon-amount span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .coupon-stats {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .coupon-stats .issued {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-primary);
+  }
+
+  .coupon-stats .total {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .coupon-progress {
+    width: 80px;
+    height: 4px;
+    background: var(--bg-input);
+    border-radius: 2px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .coupon-progress-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+  }
+
+  .coupon-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .coupon-card.selected .coupon-check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* === 已选区域 === */
+  .selected-section {
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .selected-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .selected-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .selected-count {
+    font-size: 12px;
+    color: var(--accent-light);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .selected-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .selected-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+  }
+
+  .selected-item .remove {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--danger-bg);
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .selected-item .remove:hover {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  /* === 数据看板 === */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .dash-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-card .dash-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .dash-card .dash-value {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .dash-card .dash-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .dash-card:nth-child(1) .dash-icon { background: var(--accent-glow); color: var(--accent-light); }
+  .dash-card:nth-child(1) .dash-value { color: var(--accent-light); }
+  .dash-card:nth-child(2) .dash-icon { background: var(--warning-bg); color: var(--warning); }
+  .dash-card:nth-child(2) .dash-value { color: var(--warning); }
+  .dash-card:nth-child(3) .dash-icon { background: var(--success-bg); color: var(--success); }
+  .dash-card:nth-child(3) .dash-value { color: var(--success); }
+  .dash-card:nth-child(4) .dash-icon { background: var(--orange-bg); color: var(--orange); }
+  .dash-card:nth-child(4) .dash-value { color: var(--orange); }
+  .dash-card:nth-child(5) .dash-icon { background: var(--info-bg); color: var(--info); }
+  .dash-card:nth-child(5) .dash-value { color: var(--info); }
+  .dash-card:nth-child(6) .dash-icon { background: rgba(162,155,254,0.1); color: var(--accent-light); }
+  .dash-card:nth-child(6) .dash-value { color: var(--accent-light); }
+  .dash-card:nth-child(7) .dash-icon { background: var(--danger-bg); color: var(--danger); }
+  .dash-card:nth-child(7) .dash-value { color: var(--danger); }
+  .dash-card:nth-child(8) .dash-icon { background: var(--success-bg); color: var(--success); }
+  .dash-card:nth-child(8) .dash-value { color: var(--success); }
+
+  /* === 进度条 === */
+  .progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-input);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  /* === 警告提示 === */
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .alert-info {
+    background: var(--info-bg);
+    border: 1px solid rgba(116,185,255,0.2);
+    color: var(--info);
+  }
+
+  .alert i { margin-top: 2px; flex-shrink: 0; }
+
+  /* === 底部操作栏 === */
+  .form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    margin-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .form-footer .footer-left {
+    display: flex;
+    gap: 8px;
+  }
+
+  .form-footer .footer-right {
+    display: flex;
+    gap: 12px;
+  }
+
+  /* === 响应式 === */
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+    .stats-grid, .dashboard-grid { grid-template-columns: 1fr; }
+    .product-grid { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  /* === Toast === */
+  .toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--text-primary);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- 侧边栏 -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+        <div>
+          <div class="logo-text">活动营销中心</div>
+          <div class="logo-sub">Campaign Management</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-title">活动管理</div>
+        <div class="nav-item active" onclick="switchPage('create')">
+          <i class="fas fa-plus-circle"></i>
+          <span>活动配置</span>
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="avatar">于</div>
+      <div class="user-info">
+        <div class="user-name">于双赫</div>
+        <div class="user-role">运营管理员</div>
+      </div>
+      <i class="fas fa-ellipsis-v" style="color: var(--text-muted); cursor: pointer;"></i>
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main class="main-content">
+    <!-- 顶部栏 -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="breadcrumb">
+          <a href="#">活动营销中心</a>
+          <i class="fas fa-chevron-right" style="font-size: 10px;"></i>
+          <span class="current" id="breadcrumb-current">活动配置</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn"><i class="fas fa-bell"></i></button>
+        <button class="topbar-btn"><i class="fas fa-question-circle"></i></button>
+      </div>
+    </header>
+
+    <!-- 页面内容 -->
+    <div class="page-content">
+
+
+      <!-- ====== 页面1: 新建活动（单页） ====== -->
+      <section class="page-section active" id="page-create">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">活动配置</h1>
+            <p class="page-desc">为活动配置商品与优惠券</p>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- 选品管理 -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-box-open" style="color: var(--accent);"></i> 选品管理
+              </h3>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('product-modal')">
+                <i class="fas fa-plus"></i> 添加商品
+              </button>
+            </div>
+
+            <!-- 已选商品列表 -->
+            <div class="table-container" style="margin-top: 0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>商品名称</th>
+                    <th>SKU</th>
+                    <th>小AppID</th>
+                    <th>商户ID</th>
+                    <th>售价</th>
+                    <th>库存</th>
+                    <th>优惠券</th>
+                    <th>优惠券面额</th>
+                    <th>顺序</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 500;">春季新款连衣裙</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU001</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1001</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M001</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥299</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">150</td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>春季新款连衣裙专属券</option><option>满200减30</option><option>满50减2</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满200减30</span></td>
+                    <td><input type="number" value="1" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">轻薄防晒衣</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU002</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1002</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M002</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥159</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">80</td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>轻薄防晒衣专属券</option><option>满100减15</option><option>满30减2</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满100减15</span></td>
+                    <td><input type="number" value="2" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">运动休闲鞋</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU003</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1003</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M003</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥399</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">0 <span style="color: var(--danger);">售罄</span></td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>运动休闲鞋专属券</option><option>满300减50</option><option>满100减10</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满300减50</span></td>
+                    <td><input type="number" value="3" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">纯棉基础T恤</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU004</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1004</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M001</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥89</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">320</td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>纯棉基础T恤专属券</option><option>满80减10</option><option>满20减1</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满80减10</span></td>
+                    <td><input type="number" value="4" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">高腰牛仔裤</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU005</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1005</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M004</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥259</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">65</td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>高腰牛仔裤专属券</option><option>满200减30</option><option>满80减8</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满200减30</span></td>
+                    <td><input type="number" value="5" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">真丝衬衫</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU006</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1006</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M005</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥459</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">42</td>
+                    <td><select style="border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: var(--bg-input); color: var(--text-primary); min-width: 160px;"><option>真丝衬衫专属券</option><option>满400减60</option><option>满150减15</option></select></td>
+                    <td><span class="tag tag-purple" style="font-size: 11px;">满400减60</span></td>
+                    <td><input type="number" value="6" min="1" style="width: 56px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 12px; text-align: center; font-family: 'DM Sans';"></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <div class="pagination-info">共 32 件商品，第 1/6 页</div>
+                <div class="pagination-btns">
+                  <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                  <button class="page-btn active">1</button>
+                  <button class="page-btn">2</button>
+                  <button class="page-btn">3</button>
+                  <button class="page-btn">...</button>
+                  <button class="page-btn">6</button>
+                  <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <div class="footer-left">
+    
+          </div>
+          <div class="footer-right">
+            <button class="btn btn-primary" onclick="showToast('活动已发布')">
+              <i class="fas fa-rocket"></i> 发布活动
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 页面3: 活动详情（只读） ====== -->
+      <section class="page-section" id="page-detail">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">活动详情</h1>
+            <p class="page-desc">「春季焕新季」活动信息</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="switchPage('list')"><i class="fas fa-arrow-left"></i> 返回列表</button>
+            <button class="btn btn-secondary" onclick="switchPage('dashboard')"><i class="fas fa-chart-pie"></i> 查看数据</button>
+            <button class="btn btn-primary" onclick="switchPage('edit')"><i class="fas fa-edit"></i> 编辑活动</button>
+          </div>
+        </div>
+
+        <!-- 活动基础信息 -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px;">
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-info-circle" style="color: var(--accent);"></i> 活动基础信息
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">活动名称</div>
+              <div style="font-size: 14px; font-weight: 500;">春季焕新季</div>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">活动状态</div>
+              <div><span class="status-tag status-active"><span class="dot"></span>进行中</span></div>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">活动开始时间</div>
+              <div style="font-size: 14px; font-weight: 500;">2026-04-01 00:00:00</div>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">活动结束时间</div>
+              <div style="font-size: 14px; font-weight: 500;">2026-04-30 23:59:59</div>
+            </div>
+            <div style="padding: 12px 0; border-bottom: 1px solid var(--border); grid-column: 1 / -1;">
+              <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">活动备注</div>
+              <div style="font-size: 14px; color: var(--text-secondary);">春季主推活动，覆盖服装品类核心商品</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 已选商品 -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px;">
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-box-open" style="color: var(--accent);"></i> 活动商品
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 400;">共 128 SKU</span>
+          </h3>
+          <div class="table-container" style="margin-top: 0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>商品名称</th>
+                  <th>SKU</th>
+                  <th>售价</th>
+                  <th>库存</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 500;">春季新款连衣裙</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU001</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥299</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary);">150</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">轻薄防晒衣</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU002</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥159</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary);">80</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">运动休闲鞋</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU003</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥399</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary);">0 <span style="color: var(--danger);">售罄</span></td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">纯棉基础T恤</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU004</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥89</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary);">320</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">高腰牛仔裤</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU005</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥259</td>
+                  <td style="font-family: 'DM Sans'; color: var(--text-secondary);">65</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination">
+              <div class="pagination-info">共 128 件商品，第 1/26 页</div>
+              <div class="pagination-btns">
+                <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 已关联优惠券 -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+          <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-ticket-alt" style="color: var(--accent);"></i> 关联优惠券
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 400;">共 3 张</span>
+          </h3>
+          <div class="table-container" style="margin-top: 0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>券名称</th>
+                  <th>面额</th>
+                  <th>适用商品</th>
+                  <th>已发/总量</th>
+                  <th>剩余</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight: 500;">连衣裙满200减30</td>
+                  <td><span class="tag tag-purple">满200减30</span></td>
+                  <td style="font-size: 12px; color: var(--text-secondary);">春季新款连衣裙</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600;">2,500 <span style="color: var(--text-muted); font-weight: 400;">/ 10,000</span></td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--success);">7,500</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">防晒衣满100减15</td>
+                  <td><span class="tag tag-purple">满100减15</span></td>
+                  <td style="font-size: 12px; color: var(--text-secondary);">轻薄防晒衣</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600;">1,800 <span style="color: var(--text-muted); font-weight: 400;">/ 5,000</span></td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--success);">3,200</td>
+                </tr>
+                <tr>
+                  <td style="font-weight: 500;">休闲鞋满300减50</td>
+                  <td><span class="tag tag-purple">满300减50</span></td>
+                  <td style="font-size: 12px; color: var(--text-secondary);">运动休闲鞋</td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600;">1,378 <span style="color: var(--text-muted); font-weight: 400;">/ 2,000</span></td>
+                  <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">622</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 页面4: 编辑活动 ====== -->
+      <section class="page-section" id="page-edit">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">编辑活动</h1>
+            <p class="page-desc">编辑「春季焕新季」活动信息</p>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+          <!-- 活动基础信息 -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              <i class="fas fa-info-circle" style="color: var(--accent);"></i> 活动基础信息
+            </h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">活动名称 <span class="required">*</span></label>
+                <input type="text" class="form-input" value="春季焕新季">
+              </div>
+              <div class="form-group">
+                <label class="form-label">活动备注</label>
+                <input type="text" class="form-input" value="春季主推活动，覆盖服装品类核心商品">
+              </div>
+              <div class="form-group">
+                <label class="form-label">活动开始时间 <span class="required">*</span></label>
+                <input type="datetime-local" class="form-input" value="2026-04-01T00:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">活动结束时间 <span class="required">*</span></label>
+                <input type="datetime-local" class="form-input" value="2026-04-30T23:59">
+              </div>
+            </div>
+          </div>
+
+          <!-- 选品管理 -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-box-open" style="color: var(--accent);"></i> 选品管理
+              </h3>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('product-modal')">
+                <i class="fas fa-plus"></i> 添加商品
+              </button>
+            </div>
+            <div class="table-container" style="margin-top: 0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>商品名称</th>
+                    <th>SKU</th>
+                    <th>售价</th>
+                    <th>库存</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 500;">春季新款连衣裙</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU001</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥299</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">150</td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">轻薄防晒衣</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU002</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥159</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">80</td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">运动休闲鞋</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU003</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥399</td>
+                    <td style="font-family: 'DM Sans'; color: var(--text-secondary);">0 <span style="color: var(--danger);">售罄</span></td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 优惠券关联 -->
+          <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+              <h3 style="font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-ticket-alt" style="color: var(--accent);"></i> 优惠券关联
+              </h3>
+              <button class="btn btn-secondary btn-sm" onclick="openModal('coupon-modal')">
+                <i class="fas fa-plus"></i> 添加优惠券
+              </button>
+            </div>
+            <div class="table-container" style="margin-top: 0;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>券名称</th>
+                    <th>面额</th>
+                    <th>适用商品</th>
+                    <th>已发/总量</th>
+                    <th>剩余</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight: 500;">连衣裙满200减30</td>
+                    <td><span class="tag tag-purple">满200减30</span></td>
+                    <td style="font-size: 12px; color: var(--text-secondary);">春季新款连衣裙</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600;">2,500 <span style="color: var(--text-muted); font-weight: 400;">/ 10,000</span></td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--success);">7,500</td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">防晒衣满100减15</td>
+                    <td><span class="tag tag-purple">满100减15</span></td>
+                    <td style="font-size: 12px; color: var(--text-secondary);">轻薄防晒衣</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600;">1,800 <span style="color: var(--text-muted); font-weight: 400;">/ 5,000</span></td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--success);">3,200</td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 500;">休闲鞋满300减50</td>
+                    <td><span class="tag tag-purple">满300减50</span></td>
+                    <td style="font-size: 12px; color: var(--text-secondary);">运动休闲鞋</td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600;">1,378 <span style="color: var(--text-muted); font-weight: 400;">/ 2,000</span></td>
+                    <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">622</td>
+                    <td><button class="action-btn" style="color: var(--danger);" onclick="this.closest('tr').remove()">移除</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <div class="footer-left">
+            <button class="btn btn-ghost" onclick="switchPage('detail')"><i class="fas fa-arrow-left"></i> 返回详情</button>
+          </div>
+          <div class="footer-right">
+            <button class="btn btn-secondary" onclick="switchPage('detail')">取消</button>
+            <button class="btn btn-primary" onclick="alert('活动已保存！'); switchPage('detail');">
+              <i class="fas fa-save"></i> 保存修改
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====== 页面5: 活动数据看板 ====== -->
+      <section class="page-section" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">活动数据看板</h1>
+            <p class="page-desc">「春季焕新季」活动数据概览</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="goBack()"><i class="fas fa-arrow-left"></i> 返回</button>
+            <button class="btn btn-secondary btn-sm"><i class="fas fa-download"></i> 导出报表</button>
+            <div class="search-box">
+              <i class="fas fa-calendar"></i>
+              <input type="text" value="2026-04-01 ~ 2026-04-30" style="width: 180px;">
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-eye"></i></div>
+            <div class="dash-value">12,345</div>
+            <div class="dash-label">活动 PV</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-users"></i></div>
+            <div class="dash-value">3,456</div>
+            <div class="dash-label">活动 UV</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-ticket-alt"></i></div>
+            <div class="dash-value">5,678</div>
+            <div class="dash-label">发券总量</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-user-check"></i></div>
+            <div class="dash-value">2,890</div>
+            <div class="dash-label">领券人数</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-check-double"></i></div>
+            <div class="dash-value">1,234</div>
+            <div class="dash-label">核销券量</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-percentage"></i></div>
+            <div class="dash-value">21.7%</div>
+            <div class="dash-label">核销率</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-yen-sign"></i></div>
+            <div class="dash-value">¥52.8w</div>
+            <div class="dash-label">活动 GMV</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-icon"><i class="fas fa-receipt"></i></div>
+            <div class="dash-value">¥428</div>
+            <div class="dash-label">活动客单价</div>
+          </div>
+        </div>
+
+        <!-- 券效果明细 -->
+        <div class="table-container" style="margin-bottom: 24px;">
+          <div class="table-header">
+            <div class="table-title">券效果明细</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>券名称</th>
+                <th>类型</th>
+                <th>发放量</th>
+                <th>核销量</th>
+                <th>核销率</th>
+                <th>贡献 GMV</th>
+                <th>库存剩余</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">连衣裙满200减30</td>
+                <td><span class="tag tag-purple">满减</span></td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">2,500</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">680</td>
+                <td>
+                  <span style="font-family: 'DM Sans'; font-weight: 600; color: var(--success);">27.2%</span>
+                  <div class="progress-bar-container" style="width: 60px; display: inline-block; vertical-align: middle; margin-left: 8px;">
+                    <div class="progress-bar-fill" style="width: 27.2%; background: var(--success);"></div>
+                  </div>
+                </td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥45,600</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">7,500</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">防晒衣满100减15</td>
+                <td><span class="tag tag-purple">满减</span></td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">1,800</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">380</td>
+                <td>
+                  <span style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">21.1%</span>
+                  <div class="progress-bar-container" style="width: 60px; display: inline-block; vertical-align: middle; margin-left: 8px;">
+                    <div class="progress-bar-fill" style="width: 21.1%; background: var(--warning);"></div>
+                  </div>
+                </td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥28,900</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">3,200</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">休闲鞋满300减50</td>
+                <td><span class="tag tag-purple">满减</span></td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">1,378</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">174</td>
+                <td>
+                  <span style="font-family: 'DM Sans'; font-weight: 600; color: var(--danger);">12.6%</span>
+                  <div class="progress-bar-container" style="width: 60px; display: inline-block; vertical-align: middle; margin-left: 8px;">
+                    <div class="progress-bar-fill" style="width: 12.6%; background: var(--danger);"></div>
+                  </div>
+                </td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥14,500</td>
+                <td style="font-family: 'DM Sans'; color: var(--danger);">622</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 商品效果明细 -->
+        <div class="table-container">
+          <div class="table-header">
+            <div class="table-title">商品效果明细 TOP 5</div>
+            <div class="table-actions">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索商品...">
+              </div>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>商品名称</th>
+                <th>SKU</th>
+                <th>售价</th>
+                <th>销量</th>
+                <th>GMV</th>
+                <th>使用的券</th>
+                <th>核销量</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">春季新款连衣裙 碎花款</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">SKU001</td>
+                <td style="font-family: 'DM Sans';">¥299</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">320</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥95,680</td>
+                <td><span class="tag tag-purple">满200减30</span></td>
+                <td style="font-family: 'DM Sans';">280</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">轻薄防晒衣 UPF50+</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">SKU002</td>
+                <td style="font-family: 'DM Sans';">¥159</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">210</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥33,390</td>
+                <td><span class="tag tag-purple">满100减15</span></td>
+                <td style="font-family: 'DM Sans';">180</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">运动休闲鞋 透气网面</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">SKU003</td>
+                <td style="font-family: 'DM Sans';">¥399</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">180</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥71,820</td>
+                <td><span class="tag tag-purple">满300减50</span></td>
+                <td style="font-family: 'DM Sans';">150</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">高腰牛仔裤 修身显瘦</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">SKU005</td>
+                <td style="font-family: 'DM Sans';">¥259</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">156</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥40,404</td>
+                <td><span class="tag tag-purple">满200减30</span></td>
+                <td style="font-family: 'DM Sans';">120</td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">真丝衬衫 职场通勤</td>
+                <td style="font-family: 'DM Sans'; color: var(--text-secondary);">SKU006</td>
+                <td style="font-family: 'DM Sans';">¥459</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600;">98</td>
+                <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--warning);">¥44,982</td>
+                <td><span class="tag tag-purple">满300减50</span></td>
+                <td style="font-family: 'DM Sans';">85</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <div class="pagination-info">共 128 件商品，展示 TOP 5</div>
+            <div class="pagination-btns">
+              <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">...</button>
+              <button class="page-btn">26</button>
+              <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- 选品弹窗 -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">选择商品</h3>
+      <button class="modal-close" onclick="closeModal('product-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: var(--text-secondary);">已选 <strong style="color: var(--accent-light);">32</strong> / 200 SKU</div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="搜索商品名称/SKU">
+        </div>
+      </div>
+      <div class="table-container" style="margin-top: 0;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px;"></th>
+              <th>商品名称</th>
+              <th>SKU</th>
+              <th>小AppID</th>
+              <th>商户ID</th>
+              <th>售价</th>
+              <th>库存</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: var(--accent-glow);">
+              <td><input type="checkbox" checked style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">春季新款连衣裙</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU001</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1001</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M001</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥299</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">150</td>
+            </tr>
+            <tr style="background: var(--accent-glow);">
+              <td><input type="checkbox" checked style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">轻薄防晒衣</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU002</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1002</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M002</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥159</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">80</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">运动休闲鞋</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU003</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1003</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M003</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥399</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">0 <span style="color: var(--danger);">售罄</span></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">纯棉基础T恤</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU004</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1004</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M001</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥89</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">320</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">高腰牛仔裤</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU005</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1005</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M004</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥259</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">65</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" style="accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer;"></td>
+              <td style="font-weight: 500;">真丝衬衫</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">SKU006</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">app_1006</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary); font-size: 12px;">M005</td>
+              <td style="font-family: 'DM Sans'; font-weight: 600; color: var(--orange);">¥459</td>
+              <td style="font-family: 'DM Sans'; color: var(--text-secondary);">42</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" style="margin-top: 16px; padding: 12px 0; border-top: 1px solid var(--border);">
+        <div class="pagination-info">共 156 件商品，第 1/26 页</div>
+        <div class="pagination-btns">
+          <button class="page-btn"><i class="fas fa-chevron-left"></i></button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('product-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('product-modal')">确认选择</button>
+    </div>
+  </div>
+</div>
+
+<!-- 优惠券弹窗 -->
+<div class="modal-overlay" id="coupon-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">选择优惠券</h3>
+      <button class="modal-close" onclick="closeModal('coupon-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: var(--text-secondary);">已选 <strong style="color: var(--accent-light);">3</strong> 张</div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="搜索优惠券名称">
+        </div>
+      </div>
+      <div class="coupon-list">
+        <div class="coupon-card selected" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">连衣裙满200减30</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满200减30</span>
+              <span><i class="fas fa-box"></i> 适用: 春季新款连衣裙</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">2,500</div>
+            <div class="total">/ 10,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 25%;"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="coupon-card selected" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">防晒衣满100减15</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满100减15</span>
+              <span><i class="fas fa-box"></i> 适用: 轻薄防晒衣</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">1,800</div>
+            <div class="total">/ 5,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 36%;"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="coupon-card selected" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">休闲鞋满300减50</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满300减50</span>
+              <span><i class="fas fa-box"></i> 适用: 运动休闲鞋</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">1,378</div>
+            <div class="total">/ 2,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 69%; background: var(--warning);"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="coupon-card" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">T恤满50减8</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满50减8</span>
+              <span><i class="fas fa-box"></i> 适用: 纯棉基础T恤</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">3,200</div>
+            <div class="total">/ 8,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 40%;"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="coupon-card" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">牛仔裤满200减35</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满200减35</span>
+              <span><i class="fas fa-box"></i> 适用: 高腰牛仔裤</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">890</div>
+            <div class="total">/ 3,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 30%;"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+        <div class="coupon-card" onclick="this.classList.toggle('selected')">
+          <div class="coupon-icon"><i class="fas fa-tag"></i></div>
+          <div class="coupon-detail">
+            <div class="coupon-name">衬衫满300减45</div>
+            <div class="coupon-amount">
+              <span><i class="fas fa-coins"></i> 满300减45</span>
+              <span><i class="fas fa-box"></i> 适用: 真丝衬衫</span>
+            </div>
+          </div>
+          <div class="coupon-stats">
+            <div class="issued">560</div>
+            <div class="total">/ 2,000 张</div>
+            <div class="coupon-progress">
+              <div class="coupon-progress-bar" style="width: 28%;"></div>
+            </div>
+          </div>
+          <div class="coupon-check"><i class="fas fa-check"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('coupon-modal')">取消</button>
+      <button class="btn btn-primary" onclick="closeModal('coupon-modal')">确认选择</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 记录上一页，用于返回
+  let previousPage = 'list';
+
+  // 页面切换
+  function switchPage(page) {
+    previousPage = document.querySelector('.page-section.active')?.id?.replace('page-', '') || 'list';
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.target?.closest('.nav-item')?.classList.add('active');
+
+    const names = { list: '活动配置', create: '活动配置', detail: '活动详情', edit: '编辑活动', dashboard: '活动数据看板' };
+    document.getElementById('breadcrumb-current').textContent = names[page] || page;
+  }
+
+  // 返回上一页
+  function goBack() {
+    switchPage.call(null, previousPage);
+  }
+
+  // Toast 提示
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // 弹窗控制
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // 点击遮罩关闭弹窗
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Tab 切换
+  document.querySelectorAll('.tab-item').forEach(tab => {
+    tab.addEventListener('click', function() {
+      this.parentElement.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
